@@ -9,12 +9,12 @@ from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.losses import sparse_categorical_crossentropy
 import math
 
-tf.compat.v1.disable_eager_execution()
+# tf.compat.v1.disable_eager_execution()
 # (x_train, y_train), (x_test, y_test) = mnist.load_data()
 # x_train, x_test = x_train/255.0, x_test/255.0
 # y_train = k.cast(y_train, 'float32')
 # y_test = k.cast(y_test, 'float32')
-x = tf.random.uniform(minval=0, maxval=1, shape=(1000, 128), dtype=tf.float32)
+x = tf.random.uniform(minval=0, maxval=1, shape=(128, 128, 1), dtype=tf.float32)
 y = tf.multiply(tf.reduce_sum(x, axis=-1), 5)
 
 weight_init = RandomNormal()
@@ -35,7 +35,7 @@ model.add(Conv2D(128, kernel_size=(3, 3), activation='relu', kernel_initializer=
 model.add(Conv2D(64, (3, 3), activation='relu', kernel_initializer=weight_init))
 model.add(MaxPooling2D(pool_size=(2, 2)))
 model.add(Dropout(0.25))
-input_layer = Input(shape=(128, 128))
+input_layer = Input(shape=(128, 128, 1))
 model.add(input_layer)
 hidden_layer_1 = Dense(128, activation='relu', kernel_initializer=weight_init)
 model.add(hidden_layer_1)
@@ -64,13 +64,13 @@ def step(x_true, y_true):
     opt.apply_gradients(zip(grads, model.trainable_variables))
 
 
-def training_loop():
-    bat_per_epoch = math.floor(len(x)/batch_size)
-    for epoch in range(epochs):
-        print('=', end='')
-        for i in range(bat_per_epoch):
-            n = i * batch_size
-            step(x[n:(n + batch_size)], y[n:n + batch_size])
+# Training loop
+bat_per_epoch = math.floor(len(x)/batch_size)
+for epoch in range(epochs):
+    print('=', end='')
+    for i in range(bat_per_epoch):
+        n = i * batch_size
+        step(x[n:(n + batch_size)], y[n:n + batch_size])
 
 
 # Compile the model
