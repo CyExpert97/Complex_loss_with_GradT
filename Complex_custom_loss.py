@@ -15,7 +15,7 @@ import math
 # y_train = k.cast(y_train, 'float32')
 # y_test = k.cast(y_test, 'float32')
 x = tf.random.uniform(minval=0, maxval=1, shape=(128, 128, 1), dtype=tf.float32)
-y = tf.multiply(tf.reduce_sum(x, axis=-1), 5)
+y = tf.multiply(tf.reduce_sum(x), 5)
 
 weight_init = RandomNormal()
 opt = Adam(lr=0.001)
@@ -57,8 +57,8 @@ def custom_loss(layer):
 
 def step(x_true, y_true):
     with tf.GradientTape() as tape:
-        pred = model(x_true)
-        loss = sparse_categorical_crossentropy(y_true, pred)
+        pred_y = model(x_true)
+        loss = sparse_categorical_crossentropy(y_true, pred_y)
 
     grads = tape.gradient(loss, model.trainable_variables)
     opt.apply_gradients(zip(grads, model.trainable_variables))
@@ -70,7 +70,7 @@ for epoch in range(epochs):
     print('=', end='')
     for i in range(bat_per_epoch):
         n = i * batch_size
-        step(x[n:(n + batch_size)], y[n:n + batch_size])
+        step(x[n:n + batch_size], y[n:n + batch_size])
 
 
 # Compile the model
@@ -78,9 +78,9 @@ model.compile(optimizer=opt,
               loss=custom_loss(input_layer),  # Call the loss function with the selected layer
               metrics=['accuracy'])
 
-# train
+# Fit model
 
-model.fit(x, y, steps_per_epoch=100, epochs=10)
+model.fit(x, y, steps_per_epoch=100, epochs=epochs)
 # history = model.fit(x, y, epochs=6)
 #
 # score = model.evaluate(x_test, y_test)
