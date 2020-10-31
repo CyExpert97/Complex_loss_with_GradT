@@ -8,15 +8,20 @@ from tensorflow.keras.initializers import RandomNormal
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.losses import sparse_categorical_crossentropy
 import math
+import numpy as np
 
-# tf.compat.v1.disable_eager_execution()
-# (x_train, y_train), (x_test, y_test) = mnist.load_data()
-# x_train, x_test = x_train/255.0, x_test/255.0
-# y_train = k.cast(y_train, 'float32')
-# y_test = k.cast(y_test, 'float32')
+
 x = tf.random.uniform(minval=0, maxval=1, shape=(128, 128, 1), dtype=tf.float32)
-y = tf.multiply(tf.reduce_sum(x), 5)
+proto_x = tf.make_tensor_proto(x)
+y = tf.multiply(tf.reduce_sum(x), 1)
+proto_y = tf.make_tensor_proto(y)
+print(type(x))
+print(y.shape)
+print(y)
+print(type(proto_x))
+print(type(proto_y))
 
+# Hyperparameters
 weight_init = RandomNormal()
 opt = Adam(lr=0.001)
 batch_size = 128
@@ -41,7 +46,7 @@ hidden_layer_1 = Dense(128, activation='relu', kernel_initializer=weight_init)
 model.add(hidden_layer_1)
 hidden_layer_2 = Dropout(0.3)
 model.add(hidden_layer_2)
-output_layer = Dense(128, activation='softmax', kernel_initializer=weight_init)
+output_layer = Dense(1, activation='softmax', kernel_initializer=weight_init)
 model.add(output_layer)
 
 
@@ -70,7 +75,7 @@ for epoch in range(epochs):
     print('=', end='')
     for i in range(bat_per_epoch):
         n = i * batch_size
-        step(x[n:n + batch_size], y[n:n + batch_size])
+        step(x[n:n + batch_size], y)
 
 
 # Compile the model
@@ -79,7 +84,6 @@ model.compile(optimizer=opt,
               metrics=['accuracy'])
 
 # Fit model
-
 model.fit(x, y, steps_per_epoch=100, epochs=epochs)
 # history = model.fit(x, y, epochs=6)
 #
