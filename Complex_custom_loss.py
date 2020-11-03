@@ -11,11 +11,9 @@ from tensorflow.keras.losses import sparse_categorical_crossentropy
 import math
 import numpy as np
 
-
 # x and y are defined as our sample data
 x = tf.random.uniform(minval=0, maxval=1, shape=(128, 4, 1), dtype=tf.float32)
 y = tf.multiply(tf.reduce_sum(x, axis=-1), 7)
-
 
 # Hyperparameters
 weight_init = RandomNormal()
@@ -26,12 +24,12 @@ epochs = 10
 # Builds model that we will use for the training process
 model = Sequential()
 model.add(Conv2D(32, kernel_size=(1, 1), activation='relu', kernel_initializer=weight_init, input_shape=[128, 4, 1]))
-model.add(Conv2D(64, (3, 3), activation='relu', kernel_initializer=weight_init))
-model.add(MaxPooling2D(pool_size=(2, 2)))
+model.add(Conv2D(64, (2, 2), activation='relu', kernel_initializer=weight_init))
+model.add(MaxPooling2D(pool_size=(1, 1)))
 model.add(Dropout(0.25))
-flatten = Flatten(k.shape(x)[0])
+flatten = Flatten()
 model.add(flatten)
-hidden_layer_1 = Dense(16, input_shape=[4], activation='relu', kernel_initializer=weight_init)
+hidden_layer_1 = Dense(32, input_shape=[128, 4, 1], activation='relu', kernel_initializer=weight_init)
 model.add(hidden_layer_1)
 hidden_layer_2 = Dropout(0.3)
 model.add(hidden_layer_2)
@@ -70,7 +68,7 @@ for epoch in range(epochs):
     print('=', end='')
     for i in range(bat_per_epoch):
         n = i * batch_size
-        step(x[n:n + batch_size], y[n:n + batch_size])
+        step(x[1:n], y[1:n])
 
 
 # Compile the model
