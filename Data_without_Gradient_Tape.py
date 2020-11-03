@@ -9,6 +9,7 @@ y = tf.multiply(tf.reduce_sum(x, axis=-1), 5)
 print(x.shape)
 print(type(x))
 print(type(y))
+print(y.shape)
 
 # Build a model
 inputs = Input(shape=(128, ))
