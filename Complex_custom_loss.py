@@ -13,7 +13,7 @@ import numpy as np
 
 # x and y are defined as our sample data
 x = tf.random.uniform(minval=0, maxval=1, shape=(128, 4, 1), dtype=tf.float32)
-y = tf.multiply(tf.reduce_sum(x, axis=-1), 7)
+y = tf.multiply(tf.reduce_sum(x, axis=-1), 0.5)  # Raises error if the value is over 1. Short term fix is make it 1 or less but maybe look into problem later.
 
 # Hyperparameters
 weight_init = RandomNormal()
@@ -29,11 +29,11 @@ model.add(MaxPooling2D(pool_size=(1, 1)))
 model.add(Dropout(0.25))
 flatten = Flatten()
 model.add(flatten)
-hidden_layer_1 = Dense(32, input_shape=[128, 4, 1], activation='relu', kernel_initializer=weight_init)
+hidden_layer_1 = Dense(32, activation='relu', kernel_initializer=weight_init)
 model.add(hidden_layer_1)
 hidden_layer_2 = Dropout(0.3)
 model.add(hidden_layer_2)
-hidden_layer_3 = Dense(32, activation='relu', kernel_initializer=weight_init)
+# hidden_layer_3 = Dense(32, activation='relu', kernel_initializer=weight_init)
 output_layer = Dense(28, activation='softmax', kernel_initializer=weight_init)
 model.add(output_layer)
 
@@ -52,7 +52,7 @@ def custom_loss(layer):
 def step(x_true, y_true):
     with tf.GradientTape() as tape:
         # Make prediction
-        pred_y = model(x_true)
+        pred_y = 0.5*x_true
         # Calculate loss
         loss = sparse_categorical_crossentropy(y_true, pred_y)
 
@@ -66,9 +66,9 @@ def step(x_true, y_true):
 bat_per_epoch = math.floor(len(x)/batch_size)
 for epoch in range(epochs):
     print('=', end='')
-    for i in range(bat_per_epoch):
-        n = i * batch_size
-        step(x[1:n], y[1:n])
+    # for i in range(bat_per_epoch):
+    #     n = i * batch_size
+    step(x, y)
 
 
 # Compile the model
