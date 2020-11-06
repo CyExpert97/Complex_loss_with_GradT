@@ -7,13 +7,13 @@ from keras import Model
 from keras.models import Sequential
 from tensorflow.keras.initializers import RandomNormal
 from tensorflow.keras.optimizers import Adam
-from tensorflow.keras.losses import sparse_categorical_crossentropy
-import math
+from tensorflow.keras.losses import sparse_categorical_crossentropy, categorical_crossentropy
 import numpy as np
 
+z = 7
 # x and y are defined as our sample data
 x = tf.random.uniform(minval=0, maxval=1, shape=(128, 4, 1), dtype=tf.float32)
-y = tf.multiply(tf.reduce_sum(x, axis=-1), 0.5)  # Raises error if the value is over 1. Short term fix is make it 1 or less but maybe look into problem later.
+y = tf.multiply(tf.reduce_sum(x, axis=-1), z)
 
 # Hyperparameters
 weight_init = RandomNormal()
@@ -52,9 +52,9 @@ def custom_loss(layer):
 def step(x_true, y_true):
     with tf.GradientTape() as tape:
         # Make prediction
-        pred_y = 0.5*x_true
+        y_pred = z * tf.reduce_sum(x_true, axis=-1)
         # Calculate loss
-        loss = sparse_categorical_crossentropy(y_true, pred_y)
+        loss = categorical_crossentropy(y_true, y_pred)
 
     # Calculate gradients
     grads = tape.gradient(loss, model.trainable_variables)
@@ -63,7 +63,7 @@ def step(x_true, y_true):
 
 
 # Training loop
-bat_per_epoch = math.floor(len(x)/batch_size)
+bat_per_epoch = tf.math.floor(len(x)/batch_size)
 for epoch in range(epochs):
     print('=', end='')
     # for i in range(bat_per_epoch):
