@@ -51,6 +51,7 @@ def custom_loss(layer):
 # Defines function for calculating gradient at each step of learning process
 def step(x_true, y_true):
     with tf.GradientTape() as tape:
+        tape.watch(x_true)
         # Make prediction
         y_pred = z * tf.reduce_sum(x_true, axis=-1)
         # Calculate loss
@@ -64,6 +65,7 @@ def step(x_true, y_true):
 
 # Training loop
 bat_per_epoch = tf.math.floor(len(x)/batch_size)
+print(bat_per_epoch)
 for epoch in range(epochs):
     print('=', end='')
     # for i in range(bat_per_epoch):
