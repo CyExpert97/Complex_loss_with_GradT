@@ -9,11 +9,17 @@ from tensorflow.keras.initializers import RandomNormal
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.losses import sparse_categorical_crossentropy, categorical_crossentropy
 import numpy as np
+import random
 
-z = 7
+
 # x and y are defined as our sample data
-x = tf.random.uniform(minval=0, maxval=1, shape=(128, 4, 1), dtype=tf.float32)
-y = tf.multiply(tf.reduce_sum(x, axis=-1), z)
+x = np.asarray(tf.random.uniform(minval=0, maxval=1, shape=(128, 4, 1), dtype=tf.float32))
+y = np.asarray(tf.multiply(tf.reduce_sum(x, axis=-1), 7))
+print(type(x))
+print(x.shape)
+print(y.shape)
+
+a = tf.Variable(random.random(), trainable=True)
 
 # Hyperparameters
 weight_init = RandomNormal()
@@ -51,9 +57,8 @@ def custom_loss(layer):
 # Defines function for calculating gradient at each step of learning process
 def step(x_true, y_true):
     with tf.GradientTape() as tape:
-        tape.watch(x_true)
         # Make prediction
-        y_pred = z * tf.reduce_sum(x_true, axis=-1)
+        y_pred = a * tf.reduce_sum(x_true, axis=-1)
         # Calculate loss
         loss = categorical_crossentropy(y_true, y_pred)
 
@@ -64,13 +69,11 @@ def step(x_true, y_true):
 
 
 # Training loop
-bat_per_epoch = tf.math.floor(len(x)/batch_size)
-print(bat_per_epoch)
+# bat_per_epoch = tf.math.floor(len(x)/batch_size)
 for epoch in range(epochs):
     print('=', end='')
-    # for i in range(bat_per_epoch):
-    #     n = i * batch_size
-    step(x, y)
+    for i in range(epochs):
+        step(x, y)
 
 
 # Compile the model
@@ -78,5 +81,4 @@ model.compile(optimizer=opt,
               loss=custom_loss(flatten),  # Call the loss function with the selected layer
               metrics=['accuracy'])
 
-# Fit model
-model.fit(x, y, epochs=epochs)
+print(f'y ≈ {a.numpy()}x ')
