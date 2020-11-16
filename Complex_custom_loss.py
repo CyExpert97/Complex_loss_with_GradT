@@ -3,7 +3,6 @@ import tensorflow as tf
 import keras
 import keras.backend as k
 from keras.layers import Dense, Input, Flatten, Conv2D, Dropout, MaxPooling2D
-from keras import Model
 from keras.models import Sequential
 from tensorflow.keras.initializers import RandomNormal
 from tensorflow.keras.optimizers import Adam
@@ -15,9 +14,9 @@ import random
 # x and y are defined as our sample data
 x = np.asarray(tf.random.uniform(minval=0, maxval=1, shape=(128, 4, 1), dtype=tf.float32))
 y = np.asarray(tf.multiply(tf.reduce_sum(x, axis=-1), 7))
-print(type(x))
-print(x.shape)
-print(y.shape)
+print("Type of x", type(x))
+print("Shape of x", x.shape)
+print("Shape of y", y.shape)
 
 a = tf.Variable(random.random(), trainable=True)
 
@@ -29,7 +28,7 @@ epochs = 10
 
 # Builds model that we will use for the training process
 model = Sequential()
-model.add(Conv2D(32, kernel_size=(1, 1), activation='relu', kernel_initializer=weight_init, input_shape=[128, 4, 1]))
+model.add(Conv2D(32, kernel_size=(1, 1), activation='relu', kernel_initializer=weight_init, input_shape=(128, 4, 1)))  # Giving me In[1]: [24384, 32] ( Change to input_shape=(3, 2, 1) to get In[1]: [128,32])
 model.add(Conv2D(64, (2, 2), activation='relu', kernel_initializer=weight_init))
 model.add(MaxPooling2D(pool_size=(1, 1)))
 model.add(Dropout(0.25))
@@ -42,6 +41,8 @@ model.add(hidden_layer_2)
 # hidden_layer_3 = Dense(32, activation='relu', kernel_initializer=weight_init)
 output_layer = Dense(28, activation='softmax', kernel_initializer=weight_init)
 model.add(output_layer)
+model.summary()
+# keras.utils.plot_model(model, show_shapes=True)
 
 
 # Define custom loss with added parameter of layer
@@ -58,7 +59,7 @@ def custom_loss(layer):
 def step(x_true, y_true):
     with tf.GradientTape() as tape:
         # Make prediction
-        y_pred = a * tf.reduce_sum(x_true, axis=-1)
+        y_pred = model(x_true)
         # Calculate loss
         loss = categorical_crossentropy(y_true, y_pred)
 
@@ -78,7 +79,7 @@ for epoch in range(epochs):
 
 # Compile the model
 model.compile(optimizer=opt,
-              loss=custom_loss(flatten),  # Call the loss function with the selected layer
+              loss=categorical_crossentropy,  # Call the loss function with the selected layer
               metrics=['accuracy'])
 
-print(f'y ≈ {a.numpy()}x ')
+# print(f'y ≈ {a.numpy()}x ')

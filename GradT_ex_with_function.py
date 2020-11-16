@@ -3,13 +3,13 @@ import tensorflow as tf
 import numpy as np
 print(tf.__version__)
 
-#Generate sample data
+# Generate sample data
 X = tf.constant(value=np.linspace(0, 2, 1000), dtype=tf.float32)
 Y = 5*X + 30
 
 # create variables for weight and bias
 W = tf.Variable(initial_value=0, trainable=True, name="weight", dtype=tf.float32, )
-b = tf.Variable(initial_value=0, trainable=True, name="bias", dtype=tf.float32 )
+b = tf.Variable(initial_value=0, trainable=True, name="bias", dtype=tf.float32)
 
 '''
 gredient function to calculate
@@ -27,11 +27,12 @@ def grd(x, y, W, b):
   grad = tape.gradient(loss, [W, b])
   return grad, loss
 
-STEPS = 100
+
+STEPS = 440
 LEARNING_RATE = .0001
 
 for step in range(STEPS):
-#Calculate gradients and loss
+# Calculate gradients and loss
   (d_W, d_b), loss = grd(X, Y, W, b)
 
 # update weights

@@ -2,6 +2,7 @@ import tensorflow as tf
 import keras.backend as k
 from keras.layers import Dense, Input
 from keras import Model
+import numpy as np
 
 tf.compat.v1.disable_eager_execution()
 x = tf.random.uniform(minval=0, maxval=1, shape=(128, 128), dtype=tf.float32)
