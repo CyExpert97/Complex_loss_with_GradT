@@ -12,13 +12,14 @@ import random
 
 
 # x and y are defined as our sample data
-x = np.asarray(tf.random.uniform(minval=0, maxval=1, shape=(128, 4, 1), dtype=tf.float32))
+x = np.asarray(tf.random.uniform(minval=0, maxval=1, shape=(128, 4, 1, 1), dtype=tf.float32))
 y = np.asarray(tf.multiply(tf.reduce_sum(x, axis=-1), 7))
-print("Type of x", type(x))
-print("Shape of x", x.shape)
-print("Shape of y", y.shape)
+y = y.reshape(-1, 4)
+print("Type of x:", type(x))
+print("Shape of x:", x.shape)
+print("Shape of y:", y.shape)
 
-a = tf.Variable(random.random(), trainable=True)
+# a = tf.Variable(random.random(), trainable=True)
 
 # Hyperparameters
 weight_init = RandomNormal()
@@ -28,18 +29,18 @@ epochs = 10
 
 # Builds model that we will use for the training process
 model = Sequential()
-model.add(Conv2D(32, kernel_size=(1, 1), activation='relu', kernel_initializer=weight_init, input_shape=(128, 4, 1)))  # Giving me In[1]: [24384, 32] ( Change to input_shape=(3, 2, 1) to get In[1]: [128,32])
-model.add(Conv2D(64, (2, 2), activation='relu', kernel_initializer=weight_init))
-model.add(MaxPooling2D(pool_size=(1, 1)))
+model.add(Conv2D(32, kernel_size=(1, 1), activation='relu', kernel_initializer=weight_init, input_shape=(4, 1, 1)))
+model.add(Conv2D(64, (1, 1), activation='relu', kernel_initializer=weight_init))
+model.add(MaxPooling2D(pool_size=(1, 1)))# Creating a max pooling layer like this dosen't seem to change the model. Keep it for now and return to it if it seems to create problems.
 model.add(Dropout(0.25))
 flatten = Flatten()
 model.add(flatten)
-hidden_layer_1 = Dense(32, activation='relu', kernel_initializer=weight_init)
+hidden_layer_1 = Dense(128, activation='relu', kernel_initializer=weight_init)
 model.add(hidden_layer_1)
 hidden_layer_2 = Dropout(0.3)
 model.add(hidden_layer_2)
 # hidden_layer_3 = Dense(32, activation='relu', kernel_initializer=weight_init)
-output_layer = Dense(28, activation='softmax', kernel_initializer=weight_init)
+output_layer = Dense(4, activation='softmax', kernel_initializer=weight_init)
 model.add(output_layer)
 model.summary()
 # keras.utils.plot_model(model, show_shapes=True)
@@ -79,7 +80,7 @@ for epoch in range(epochs):
 
 # Compile the model
 model.compile(optimizer=opt,
-              loss=categorical_crossentropy,  # Call the loss function with the selected layer
+              loss=custom_loss(hidden_layer_1),  # Call the loss function with the selected layer
               metrics=['accuracy'])
 
-# print(f'y ≈ {a.numpy()}x ')
+print('\n', model.evaluate(x, y)[1])
