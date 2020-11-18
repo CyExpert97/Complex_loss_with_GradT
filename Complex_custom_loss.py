@@ -7,19 +7,44 @@ from keras.models import Sequential
 from tensorflow.keras.initializers import RandomNormal
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.losses import sparse_categorical_crossentropy, categorical_crossentropy
+from sklearn.model_selection import train_test_split
+from sklearn.model_selection import cross_val_score
+from sklearn import svm
 import numpy as np
 import random
-
+import math
 
 # x and y are defined as our sample data
-x = np.asarray(tf.random.uniform(minval=0, maxval=1, shape=(128, 4, 1, 1), dtype=tf.float32))
+x = np.asarray(tf.random.uniform(minval=0, maxval=1, shape=(640, 4, 1, 1), dtype=tf.float32))
 y = np.asarray(tf.multiply(tf.reduce_sum(x, axis=-1), 7))
+X = x.reshape(-2, 4)
+# Y = np.asarray(tf.multiply(tf.reduce_sum(x, axis=-1), 7))
 y = y.reshape(-1, 4)
-print("Type of x:", type(x))
+z = np.asarray(tf.multiply(tf.reduce_sum(X, axis=-1), 7))
 print("Shape of x:", x.shape)
 print("Shape of y:", y.shape)
 
-# a = tf.Variable(random.random(), trainable=True)
+X_train, X_test, y_train, y_test = train_test_split(X, z, test_size=0.2, random_state=42)
+
+print("Shape of X_train:", X_train.shape)
+print("Shape of X_test:", X_test.shape)
+print("Shape of y_train:", y_train.shape)
+print("Shape of y_test:", y_test.shape)
+print("Shape of X:", X.shape)
+print("Shape of z:", z.shape)
+print("Length of X_train:", len(X_train))
+print("Type of x:", type(x))
+
+X_train = X_train.reshape((-1, 4, 1, 1))
+X_test = X_test.reshape((-1, 4, 1, 1))
+y_train = y_train.reshape((-1, 4))
+y_test = y_test.reshape((-1, 4))
+
+print("Shape of X_train:", X_train.shape)
+print("Shape of X_test:", X_test.shape)
+print("Shape of y_train:", y_train.shape)
+print("Shape of y_test:", y_test.shape)
+
 
 # Hyperparameters
 weight_init = RandomNormal()
@@ -31,7 +56,7 @@ epochs = 10
 model = Sequential()
 model.add(Conv2D(32, kernel_size=(1, 1), activation='relu', kernel_initializer=weight_init, input_shape=(4, 1, 1)))
 model.add(Conv2D(64, (1, 1), activation='relu', kernel_initializer=weight_init))
-model.add(MaxPooling2D(pool_size=(1, 1)))# Creating a max pooling layer like this dosen't seem to change the model. Keep it for now and return to it if it seems to create problems.
+model.add(MaxPooling2D(pool_size=(1, 1)))
 model.add(Dropout(0.25))
 flatten = Flatten()
 model.add(flatten)
@@ -60,27 +85,30 @@ def custom_loss(layer):
 def step(x_true, y_true):
     with tf.GradientTape() as tape:
         # Make prediction
-        y_pred = model(x_true)
+        y_pred = model(x_true.reshape((-1, 4, 1, 1)))
         # Calculate loss
-        loss = categorical_crossentropy(y_true, y_pred)
+        model_loss = categorical_crossentropy(y_true, y_pred)
 
     # Calculate gradients
-    grads = tape.gradient(loss, model.trainable_variables)
+    model_grads = tape.gradient(model_loss, model.trainable_variables)
     # Update model
-    opt.apply_gradients(zip(grads, model.trainable_variables))
+    opt.apply_gradients(zip(model_grads, model.trainable_variables))
 
 
 # Training loop
-# bat_per_epoch = tf.math.floor(len(x)/batch_size)
+bat_per_epoch = math.floor(len(X_train)/batch_size)
+print(bat_per_epoch)
+print(range(bat_per_epoch))
 for epoch in range(epochs):
     print('=', end='')
-    for i in range(epochs):
-        step(x, y)
+    for i in range(bat_per_epoch):
+        n = i*batch_size
+        step(X_train[n:n+batch_size], y_train[n:n+batch_size])
 
 
 # Compile the model
 model.compile(optimizer=opt,
-              loss=custom_loss(hidden_layer_1),  # Call the loss function with the selected layer
+              loss=categorical_crossentropy,  # Call the loss function with the selected layer
               metrics=['accuracy'])
 
-print('\n', model.evaluate(x, y)[1])
+print('\n', model.evaluate(X_test, y_test)[1])
