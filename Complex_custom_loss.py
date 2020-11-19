@@ -15,7 +15,7 @@ import random
 import math
 
 # x and y are defined as our sample data
-x = np.asarray(tf.random.uniform(minval=0, maxval=1, shape=(640, 4, 1, 1), dtype=tf.float32))
+x = np.asarray(tf.random.uniform(minval=0, maxval=1, shape=(6400, 4, 1, 1), dtype=tf.float32))
 # y = np.asarray(tf.multiply(tf.reduce_sum(x, axis=-1), 7))
 X = x.reshape(-2, 4)
 # y = y.reshape(-1, 4)
@@ -49,7 +49,6 @@ hidden_layer_1 = Dense(128, activation='relu', kernel_initializer=weight_init)
 model.add(hidden_layer_1)
 hidden_layer_2 = Dropout(0.3)
 model.add(hidden_layer_2)
-# hidden_layer_3 = Dense(32, activation='relu', kernel_initializer=weight_init)
 output_layer = Dense(4, activation='softmax', kernel_initializer=weight_init)
 model.add(output_layer)
 model.summary()
@@ -81,13 +80,12 @@ def step(real_x, real_y):
 
 
 # Training loop
-bat_per_epoch = math.floor(len(X_train)/batch_size)
+bat_per_epoch = math.floor(len(X_train) / batch_size)
 for epoch in range(epochs):
     print('=', end='')
     for i in range(bat_per_epoch):
         n = i*batch_size
-        m = int((i*batch_size)/4)
-        step(X_train[n:(n+batch_size)], y_train[m:(m+int((batch_size/4)))])
+        step(X_train[n:n+batch_size], y_train[n:n+batch_size])
 
 
 # Compile the model
