@@ -67,12 +67,12 @@ model.summary()
 
 
 # Defines function for calculating gradient at each step of learning process
-def step(x_true, y_true):
+def step(real_x, real_y):
     with tf.GradientTape() as tape:
         # Make prediction
-        y_pred = np.asarray(model(x_true.reshape((-1, 4, 1, 1))))
+        pred_y = model(real_x.reshape((-1, 4, 1, 1)))
         # Calculate loss
-        model_loss = categorical_crossentropy(y_true, y_pred)
+        model_loss = categorical_crossentropy(real_y, pred_y)
 
     # Calculate gradients
     model_grads = tape.gradient(model_loss, model.trainable_variables)
