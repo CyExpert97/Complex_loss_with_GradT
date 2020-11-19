@@ -21,12 +21,12 @@ X = x.reshape(-2, 4)
 # y = y.reshape(-1, 4)
 z = np.asarray(tf.multiply(tf.reduce_sum(X, axis=-1), 7))
 
-X_train, X_test, y_train, y_test = train_test_split(X, z, test_size=0.2, random_state=42)
+X_train, y_training, X_testing, y_test = train_test_split(X, z, test_size=0.2, random_state=42)
 
 
 X_train = X_train.reshape((-1, 4, 1, 1))
-X_test = X_test.reshape((-1, 4, 1, 1))
-y_train = y_train.reshape((-1, 4))
+y_training = y_training.reshape((-1, 4))
+X_testing = X_testing.reshape((-1, 4, 1, 1))
 y_test = y_test.reshape((-1, 4))
 
 
@@ -78,14 +78,18 @@ def step(real_x, real_y):
     # Update model
     opt.apply_gradients(zip(model_grads, model.trainable_variables))
 
+print(X_train.shape)
+print(X_testing.shape)
+print(y_training.shape)
+print(y_test.shape)
 
 # Training loop
-bat_per_epoch = math.floor(len(X_train) / batch_size)
+bat_per_epoch = int(math.floor(len(X_train) / batch_size)/4)
 for epoch in range(epochs):
     print('=', end='')
     for i in range(bat_per_epoch):
         n = i*batch_size
-        step(X_train[n:n+batch_size], y_train[n:n+batch_size])
+        step(X_train[n:n+batch_size], y_training[n:n + batch_size])
 
 
 # Compile the model
@@ -93,4 +97,4 @@ model.compile(optimizer=opt,
               loss=categorical_crossentropy,  # Call the loss function with the selected layer
               metrics=['accuracy'])
 
-print('\n', model.evaluate(X_test, y_test)[1])
+print('\n', model.evaluate(y_training, y_test)[1])
