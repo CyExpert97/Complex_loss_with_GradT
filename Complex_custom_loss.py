@@ -18,7 +18,6 @@ import math
 x = np.asarray(tf.random.uniform(minval=0, maxval=1, shape=(640, 4, 1, 1), dtype=tf.float32))
 y = np.asarray(tf.multiply(tf.reduce_sum(x, axis=-1), 7))
 X = x.reshape(-2, 4)
-# Y = np.asarray(tf.multiply(tf.reduce_sum(x, axis=-1), 7))
 y = y.reshape(-1, 4)
 z = np.asarray(tf.multiply(tf.reduce_sum(X, axis=-1), 7))
 print("Shape of x:", x.shape)
@@ -26,24 +25,11 @@ print("Shape of y:", y.shape)
 
 X_train, X_test, y_train, y_test = train_test_split(X, z, test_size=0.2, random_state=42)
 
-print("Shape of X_train:", X_train.shape)
-print("Shape of X_test:", X_test.shape)
-print("Shape of y_train:", y_train.shape)
-print("Shape of y_test:", y_test.shape)
-print("Shape of X:", X.shape)
-print("Shape of z:", z.shape)
-print("Length of X_train:", len(X_train))
-print("Type of x:", type(x))
 
 X_train = X_train.reshape((-1, 4, 1, 1))
 X_test = X_test.reshape((-1, 4, 1, 1))
 y_train = y_train.reshape((-1, 4))
 y_test = y_test.reshape((-1, 4))
-
-print("Shape of X_train:", X_train.shape)
-print("Shape of X_test:", X_test.shape)
-print("Shape of y_train:", y_train.shape)
-print("Shape of y_test:", y_test.shape)
 
 
 # Hyperparameters
@@ -72,20 +58,20 @@ model.summary()
 
 
 # Define custom loss with added parameter of layer
-def custom_loss(layer):
+# def custom_loss(layer):
     # Create a loss function that adds the MSE loss to the mean of all squared activations of a specific layer
-    def loss(y_true, y_pred):
-        return k.mean(k.square(y_pred - y_true + k.square(layer)))
+    # def loss(y_true, y_pred):
+    #     return k.mean(k.square(y_pred - y_true + k.square(layer)))
 
     # Return a function
-    return loss
+    # return loss
 
 
 # Defines function for calculating gradient at each step of learning process
 def step(x_true, y_true):
     with tf.GradientTape() as tape:
         # Make prediction
-        y_pred = model(x_true.reshape((-1, 4, 1, 1)))
+        y_pred = np.asarray(model(x_true.reshape((-1, 4, 1, 1))))
         # Calculate loss
         model_loss = categorical_crossentropy(y_true, y_pred)
 
@@ -97,8 +83,6 @@ def step(x_true, y_true):
 
 # Training loop
 bat_per_epoch = math.floor(len(X_train)/batch_size)
-print(bat_per_epoch)
-print(range(bat_per_epoch))
 for epoch in range(epochs):
     print('=', end='')
     for i in range(bat_per_epoch):
