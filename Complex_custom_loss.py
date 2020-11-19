@@ -16,12 +16,10 @@ import math
 
 # x and y are defined as our sample data
 x = np.asarray(tf.random.uniform(minval=0, maxval=1, shape=(640, 4, 1, 1), dtype=tf.float32))
-y = np.asarray(tf.multiply(tf.reduce_sum(x, axis=-1), 7))
+# y = np.asarray(tf.multiply(tf.reduce_sum(x, axis=-1), 7))
 X = x.reshape(-2, 4)
-y = y.reshape(-1, 4)
+# y = y.reshape(-1, 4)
 z = np.asarray(tf.multiply(tf.reduce_sum(X, axis=-1), 7))
-print("Shape of x:", x.shape)
-print("Shape of y:", y.shape)
 
 X_train, X_test, y_train, y_test = train_test_split(X, z, test_size=0.2, random_state=42)
 
@@ -37,6 +35,7 @@ weight_init = RandomNormal()
 opt = Adam(lr=0.001)
 batch_size = 128
 epochs = 10
+# [n:(n+batch_size)]
 
 # Builds model that we will use for the training process
 model = Sequential()
@@ -87,7 +86,8 @@ for epoch in range(epochs):
     print('=', end='')
     for i in range(bat_per_epoch):
         n = i*batch_size
-        step(X_train[n:n+batch_size], y_train[n:n+batch_size])
+        m = int((i*batch_size)/4)
+        step(X_train[n:(n+batch_size)], y_train[m:(m+int((batch_size/4)))])
 
 
 # Compile the model
