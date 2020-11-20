@@ -9,12 +9,11 @@ from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.losses import sparse_categorical_crossentropy, categorical_crossentropy
 from sklearn.model_selection import train_test_split
 import numpy as np
-import random
 import math
 
 # x and y are defined as our sample data
 x = np.asarray(tf.random.uniform(minval=0, maxval=1, shape=(6400, 10), dtype=tf.float32))
-y = keras.utils.to_categorical(np.random.randint(10, size=(6400, 1)), num_classes=10)
+y = keras.utils.to_categorical(tf.reduce_sum(x, axis=-1), num_classes=10)
 
 x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.2, random_state=42)
 
@@ -25,7 +24,7 @@ x_test = x_test.reshape((-1, 10, 1, 1))
 weight_init = RandomNormal()
 opt = Adam(lr=0.001)
 batch_size = 128
-epochs = 15
+epochs = 50
 # [n:(n+batch_size)]
 
 # Builds model that we will use for the training process
@@ -47,13 +46,13 @@ model.summary()
 
 
 # Define custom loss with added parameter of layer
-# def custom_loss(layer):
+def custom_loss(layer):
     # Create a loss function that adds the MSE loss to the mean of all squared activations of a specific layer
-    # def loss(y_true, y_pred):
-    #     return k.mean(k.square(y_pred - y_true + k.square(layer)))
+    def loss(y_true, y_pred):
+        return k.mean(k.square(y_pred - y_true) + k.square(layer), axis=-1)
 
     # Return a function
-    # return loss
+    return loss
 
 
 # Defines function for calculating gradient at each step of learning process
@@ -86,7 +85,7 @@ for epoch in range(epochs):
 
 # Compile the model
 model.compile(optimizer=opt,
-              loss=categorical_crossentropy,  # Call the loss function with the selected layer
+              loss=custom_loss(hidden_layer_1),  # Call the loss function with the selected layer
               metrics=['accuracy'])
 
 print('\n', model.evaluate(x_test, y_test)[1])
