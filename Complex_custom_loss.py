@@ -28,7 +28,7 @@ y_test = y_test.reshape((-1, 1))
 weight_init = RandomNormal()
 opt = Adam(lr=0.001)
 batch_size = 128
-epochs = 10
+epochs = 50
 # [n:(n+batch_size)]
 
 # Builds model that we will use for the training process
@@ -79,12 +79,12 @@ print(x_test.shape)
 print(y_test.shape)
 
 # Training loop
-bat_per_epoch = int(math.floor(len(x_train) / batch_size) / 3)
+bat_per_epoch = math.floor(len(x_train) / batch_size)
 for epoch in range(epochs):
     print('=', end='')
     for i in range(bat_per_epoch):
         n = i*batch_size
-        step(x_train[n:n + batch_size], x_test[n:n + batch_size])
+        step(x_train[n:n + batch_size], y_train[n:n + batch_size])
 
 
 # Compile the model
