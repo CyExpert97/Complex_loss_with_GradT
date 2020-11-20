@@ -8,26 +8,20 @@ from tensorflow.keras.initializers import RandomNormal
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.losses import sparse_categorical_crossentropy, categorical_crossentropy
 from sklearn.model_selection import train_test_split
-from sklearn.model_selection import cross_val_score
-from sklearn import svm
 import numpy as np
 import random
 import math
 
 # x and y are defined as our sample data
-x = np.asarray(tf.random.uniform(minval=0, maxval=1, shape=(6400, 4, 1, 1), dtype=tf.float32))
-# y = np.asarray(tf.multiply(tf.reduce_sum(x, axis=-1), 7))
-X = x.reshape(-2, 4)
-# y = y.reshape(-1, 4)
-z = np.asarray(tf.multiply(tf.reduce_sum(X, axis=-1), 7))
+x = np.asarray(tf.random.uniform(minval=0, maxval=1, shape=(6400, 4), dtype=tf.float32))
+y = np.asarray(tf.multiply(tf.reduce_sum(x, axis=-1), 7))
 
-X_train, y_training, X_testing, y_test = train_test_split(X, z, test_size=0.2, random_state=42)
+x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.2, random_state=42)
 
-
-X_train = X_train.reshape((-1, 4, 1, 1))
-y_training = y_training.reshape((-1, 4))
-X_testing = X_testing.reshape((-1, 4, 1, 1))
-y_test = y_test.reshape((-1, 4))
+x_train = x_train.reshape((-1, 4, 1, 1))
+x_test = x_test.reshape((-1, 4, 1, 1))
+y_train = y_train.reshape((-1, 1))
+y_test = y_test.reshape((-1, 1))
 
 
 # Hyperparameters
@@ -49,7 +43,7 @@ hidden_layer_1 = Dense(128, activation='relu', kernel_initializer=weight_init)
 model.add(hidden_layer_1)
 hidden_layer_2 = Dropout(0.3)
 model.add(hidden_layer_2)
-output_layer = Dense(4, activation='softmax', kernel_initializer=weight_init)
+output_layer = Dense(1, activation='softmax', kernel_initializer=weight_init)
 model.add(output_layer)
 model.summary()
 # keras.utils.plot_model(model, show_shapes=True)
@@ -78,18 +72,19 @@ def step(real_x, real_y):
     # Update model
     opt.apply_gradients(zip(model_grads, model.trainable_variables))
 
-print(X_train.shape)
-print(X_testing.shape)
-print(y_training.shape)
+
+print(x_train.shape)
+print(y_train.shape)
+print(x_test.shape)
 print(y_test.shape)
 
 # Training loop
-bat_per_epoch = int(math.floor(len(X_train) / batch_size)/4)
+bat_per_epoch = int(math.floor(len(x_train) / batch_size) / 3)
 for epoch in range(epochs):
     print('=', end='')
     for i in range(bat_per_epoch):
         n = i*batch_size
-        step(X_train[n:n+batch_size], y_training[n:n + batch_size])
+        step(x_train[n:n + batch_size], x_test[n:n + batch_size])
 
 
 # Compile the model
@@ -97,4 +92,4 @@ model.compile(optimizer=opt,
               loss=categorical_crossentropy,  # Call the loss function with the selected layer
               metrics=['accuracy'])
 
-print('\n', model.evaluate(y_training, y_test)[1])
+print('\n', model.evaluate(x_test, y_test)[1])
