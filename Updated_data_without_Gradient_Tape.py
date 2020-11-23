@@ -52,42 +52,11 @@ def custom_loss(layer):
     return loss
 
 
-def custom_loss_2(y_true, y_pred):
-    loss = k.sum(k.log(y_true) - k.log(y_pred))
-    return loss
-
-
-# Defines function for calculating gradient at each step of learning process
-def step(real_x, real_y):
-    with tf.GradientTape() as tape:
-        # Make prediction
-        pred_y = model(real_x.reshape((-1, 10, 1, 1)))
-        # Calculate loss
-        model_loss = categorical_crossentropy(real_y, pred_y)
-
-    # Calculate gradients
-    model_grads = tape.gradient(model_loss, model.trainable_variables)
-    # Update model
-    opt.apply_gradients(zip(model_grads, model.trainable_variables))
-
-
-print(x_train.shape)
-print(y_train.shape)
-print(x_test.shape)
-print(y_test.shape)
-
-# Training loop
-bat_per_epoch = math.floor(len(x_train) / batch_size)
-for epoch in range(epochs):
-    print('=', end='')
-    for i in range(bat_per_epoch):
-        n = i*batch_size
-        step(x_train[n:n + batch_size], y_train[n:n + batch_size])
-
-
-# Compile the model
 model.compile(optimizer=opt,
               loss=custom_loss(hidden_layer_1),  # Call the loss function with the selected layer
               metrics=['accuracy'])
 
-print('\n', 'Accuracy:', model.evaluate(x_test, y_test)[1])
+model.fit(x_train, y_train, epochs=15)
+
+score = model.evaluate(x_test, y_test)
+print(' accuracy ', score[1])
