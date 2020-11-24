@@ -1,11 +1,11 @@
 import tensorflow as tf
 import keras
 import keras.backend as k
-from keras.layers import Dense, Input, Flatten, Conv2D, Dropout, MaxPooling2D
+from keras.layers import Dense, Flatten, Conv2D, Dropout, MaxPooling2D
 from keras.models import Sequential
 from tensorflow.keras.initializers import RandomNormal
 from tensorflow.keras.optimizers import Adam
-from tensorflow.keras.losses import sparse_categorical_crossentropy, categorical_crossentropy
+from tensorflow.keras.losses import categorical_crossentropy
 from sklearn.model_selection import train_test_split
 import numpy as np
 import math
@@ -40,7 +40,7 @@ model.add(hidden_layer_2)
 output_layer = Dense(10, activation='softmax', kernel_initializer=weight_init)
 model.add(output_layer)
 model.summary()
-print(type(hidden_layer_1))
+
 
 # Define custom loss with added parameter of layer
 def custom_loss(layer):
@@ -87,7 +87,7 @@ for epoch in range(epochs):
 
 # Compile the model
 model.compile(optimizer=opt,
-              loss=custom_loss(hidden_layer_1),  # Call the loss function with the selected layer
+              loss=custom_loss_2,  # Call the loss function with the selected layer
               metrics=['accuracy'])
 
 print('\n', 'Accuracy:', model.evaluate(x_test, y_test)[1])
