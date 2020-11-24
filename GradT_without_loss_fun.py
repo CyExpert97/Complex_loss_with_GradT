@@ -87,7 +87,7 @@ for epoch in range(epochs):
 
 # Compile the model
 model.compile(optimizer=opt,
-              loss=custom_loss(hidden_layer_1),  # Call the loss function with the selected layer
+              loss=custom_loss_2,  # Call the loss function with the selected layer
               metrics=['accuracy'])
 
 print('\n', 'Accuracy:', model.evaluate(x_test, y_test)[1])
