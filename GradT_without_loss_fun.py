@@ -26,12 +26,22 @@ class Model:
         self.epochs = 50
         self.weight_init = RandomNormal()
         self.opt = Adam(lr=0.001)
+        self.loss_fn = keras.losses.categorical_crossentropy
+        self.sample_weights = None
+        self.add_loss = None
+        # Call loss fn
+        self.call()
         # Model
         self.model = self.build_model()
         # Training compiling and printing summary
         self.model.summary()
         self.training_loop()
         self.compile_model()
+
+    def call(self):
+        loss = self.loss_fn(self.x_train, self.y_train, self.sample_weights)
+        self.add_loss(loss)
+        return tf.nn.softmax(self.y_train)
 
     def build_model(self):
         model = Sequential()
@@ -72,7 +82,7 @@ class Model:
                 self.step(self.x_train[n:(n + self.batch_size)], self.y_train[n:n + self.batch_size])
 
     def compile_model(self):
-        self.model.compile(loss=Loss_function.loss, optimizer=self.opt, metrics=['accuracy'])
+        self.model.compile(optimizer=self.opt)
 
     def return_score(self):
         score = self.model.evaluate(self.x_test, self.y_test)
@@ -87,25 +97,25 @@ class Loss_function:
         return loss
 
 
-class LogisticEndpoint(keras.layers.Layer):
-    def __init__(self, name=None):
-        super(LogisticEndpoint, self).__init__(name=name)
-        self.loss_fn = keras.losses.categorical_crossentropy(from_logits=True)
-        self.accuracy_fn = keras.metrics.categorical_accuracy()
-
-    def call(self, step.y_pred, logits, sample_weights=None):
-        # Compute the training-time loss value and add it
-        # to the layer using `self.add_loss()`.
-        loss = self.loss_fn(targets, logits, sample_weights)
-        self.add_loss(loss)
-
-        # Log accuracy as a metric and add it
-        # to the layer using `self.add_metric()`.
-        acc = self.accuracy_fn(targets, logits, sample_weights)
-        self.add_metric(acc, name="accuracy")
-
-        # Return the inference-time prediction tensor (for `.predict()`).
-        return tf.nn.softmax(logits)
+# class LogisticEndpoint(keras.layers.Layer):
+#     def __init__(self, name=None):
+#         super(LogisticEndpoint, self).__init__(name=name)
+#         self.loss_fn = keras.losses.categorical_crossentropy(from_logits=True)
+#         self.accuracy_fn = keras.metrics.categorical_accuracy()
+#
+#     def call(self, targets, logits, sample_weights=None):
+#         # Compute the training-time loss value and add it
+#         # to the layer using `self.add_loss()`.
+#         loss = self.loss_fn(targets, logits, sample_weights)
+#         self.add_loss(loss)
+#
+#         # Log accuracy as a metric and add it
+#         # to the layer using `self.add_metric()`.
+#         acc = self.accuracy_fn(targets, logits, sample_weights)
+#         self.add_metric(acc, name="accuracy")
+#
+#         # Return the inference-time prediction tensor (for `.predict()`).
+#         return tf.nn.softmax(logits)
 
 
 z = Model()
